@@ -79,33 +79,26 @@ async function fetchArtwork(source) {
 
 function VinylRecord({ isSpinning, artworkUrl }) {
   return (
-    <div className="stage">
-      <div className={`vinyl-glow${isSpinning ? ' active' : ''}`} />
-
-      <div className={`vinyl${isSpinning ? ' spinning' : ''}`}>
-        <div className="vinyl-grooves" />
-        <div className="vinyl-label">
-          {artworkUrl && (
-            <img
-              key={artworkUrl}
-              src={artworkUrl}
-              alt="Album artwork"
-              className="vinyl-artwork"
-            />
-          )}
-          <div className="vinyl-label-shine" />
-          {!artworkUrl && <span className="vinyl-label-text">KR</span>}
-          <div className="vinyl-spindle" />
-        </div>
-        <div className="vinyl-sheen" />
-      </div>
-
-      <div className={`tonearm${isSpinning ? ' playing' : ' resting'}`}>
-        <div className="arm-pivot" />
-        <div className="arm-body">
-          <div className="arm-shaft" />
-          <div className="arm-headshell" />
-          <div className="arm-needle" />
+    <div className="plinth">
+      <div className="stage">
+        <div className={`vinyl-glow${isSpinning ? ' active' : ''}`} />
+        <div className="platter-ring" />
+        <div className={`vinyl${isSpinning ? ' spinning' : ''}`}>
+          <div className="vinyl-grooves" />
+          <div className="vinyl-label">
+            {artworkUrl && (
+              <img
+                key={artworkUrl}
+                src={artworkUrl}
+                alt="Album artwork"
+                className="vinyl-artwork"
+              />
+            )}
+            <div className="vinyl-label-shine" />
+            {!artworkUrl && <span className="vinyl-label-text">KR</span>}
+            <div className="vinyl-spindle" />
+          </div>
+          <div className="vinyl-sheen" />
         </div>
       </div>
     </div>
@@ -156,8 +149,11 @@ export default function App() {
       </header>
 
       <main className="main">
-        <VinylRecord isSpinning={spinning} artworkUrl={artworkUrl} />
+        <div className="col-left">
+          <VinylRecord isSpinning={spinning} artworkUrl={artworkUrl} />
+        </div>
 
+        <div className="col-right">
         <div className="link-row">
           <input
             type="text"
@@ -225,6 +221,7 @@ export default function App() {
         <div className="shortlink-row">
           <span className="shortlink-tag">room link</span>
           <span className="shortlink-url">1dgj.com/kanso82</span>
+        </div>
         </div>
       </main>
 
