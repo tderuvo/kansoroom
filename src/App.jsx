@@ -77,13 +77,6 @@ async function fetchArtwork(source) {
   }
 }
 
-const MOODS = [
-  { id: 'crackle', label: 'Crackle' },
-  { id: 'lofi',    label: 'Lo-fi'  },
-  { id: 'rain',    label: 'Rain'   },
-  { id: 'night',   label: 'Night'  },
-]
-
 function VinylRecord({ isSpinning, artworkUrl }) {
   return (
     <div className="stage">
@@ -124,7 +117,6 @@ export default function App() {
   const [link, setLink] = useState('')
   const [embed, setEmbed] = useState(null)
   const [artworkUrl, setArtworkUrl] = useState(null)
-  const [moods, setMoods] = useState(new Set())
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -144,13 +136,9 @@ export default function App() {
   // cover both Spotify (type+id) and YouTube (videoId) identity fields
   }, [embed?.platform, embed?.id, embed?.videoId])
 
-  function toggleMood(id) {
-    setMoods(prev => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
-  }
+  useEffect(() => {
+    setSpinning(false)
+  }, [embed?.platform, embed?.id, embed?.videoId])
 
   function handleShare() {
     navigator.clipboard?.writeText('https://1dgj.com/kanso82')
@@ -168,13 +156,6 @@ export default function App() {
       </header>
 
       <main className="main">
-        <div className="hero-text">
-          <h1>Put a record on.</h1>
-          <p className="hero-sub">
-            Paste a streaming link. Choose the room. Let the record spin.
-          </p>
-        </div>
-
         <VinylRecord isSpinning={spinning} artworkUrl={artworkUrl} />
 
         <div className="link-row">
@@ -190,29 +171,14 @@ export default function App() {
           />
         </div>
 
-        <div className="mood-section">
-          <div className="section-label">Room Effects</div>
-          <div className="mood-grid">
-            {MOODS.map(m => (
-              <button
-                key={m.id}
-                className={`mood-btn${moods.has(m.id) ? ' active' : ''}`}
-                onClick={() => toggleMood(m.id)}
-              >
-                <span className="led" />
-                <span className="mood-label">{m.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="controls-row">
           <button
             className={`spin-btn${spinning ? ' playing' : ''}`}
             onClick={() => setSpinning(s => !s)}
+            disabled={!embed}
           >
-            <span className="spin-icon">{spinning ? '⏸' : '▶'}</span>
-            {spinning ? 'Pause Spin' : 'Start Spin'}
+            <span className="spin-icon">{spinning ? '■' : '▶'}</span>
+            {spinning ? 'Stop' : 'Play'}
           </button>
           <button className="share-btn" onClick={handleShare}>
             {copied ? '✓  Copied' : '↗  Share'}
