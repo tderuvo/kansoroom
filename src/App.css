@@ -1,0 +1,659 @@
+/* ─── Animations ────────────────────────────────────────────────────── */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.75; }
+}
+
+@keyframes ledFlicker {
+  0%, 100% { opacity: 1; }
+  92%       { opacity: 1; }
+  93%       { opacity: 0.6; }
+  94%       { opacity: 1; }
+}
+
+/* ─── App Shell ──────────────────────────────────────────────────────── */
+
+.app {
+  min-height: 100vh;
+  background-color: #0c0a07;
+  background-image:
+    radial-gradient(ellipse 70% 60% at 50% 35%, rgba(160, 85, 15, 0.14) 0%, transparent 75%);
+  color: #c8b888;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────── */
+
+.header {
+  width: 100%;
+  padding: 22px 32px;
+  border-bottom: 1px solid rgba(160, 100, 20, 0.12);
+  box-sizing: border-box;
+}
+
+.brand {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #b89050;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-pip {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #c8781a;
+  box-shadow: 0 0 10px #c8781aaa;
+}
+
+/* ─── Main ───────────────────────────────────────────────────────────── */
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 34px;
+  padding: 44px 24px 64px;
+  width: 100%;
+  max-width: 620px;
+  box-sizing: border-box;
+}
+
+/* ─── Hero text ──────────────────────────────────────────────────────── */
+
+.hero-text {
+  text-align: center;
+}
+
+.hero-text h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(30px, 6vw, 54px);
+  font-weight: 400;
+  color: #ecdcc0;
+  letter-spacing: -0.02em;
+  margin: 0 0 14px;
+  line-height: 1.08;
+}
+
+.hero-sub {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  font-style: italic;
+  color: #6a5c42;
+  letter-spacing: 0.04em;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ─── Vinyl Stage ────────────────────────────────────────────────────── */
+
+.stage {
+  position: relative;
+  width: 380px;
+  height: 380px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+/* Ambient glow behind the record */
+.vinyl-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(180, 100, 18, 0.28) 0%,
+    rgba(140, 70, 10, 0.10) 45%,
+    transparent 70%
+  );
+  opacity: 0.2;
+  transition: opacity 0.9s ease;
+  pointer-events: none;
+}
+
+.vinyl-glow.active {
+  opacity: 1;
+  animation: glowPulse 3.5s ease-in-out infinite;
+}
+
+/* ─── Vinyl Record ───────────────────────────────────────────────────── */
+
+.vinyl {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 48% 52%,
+    #1d1a16 0%,
+    #111009 55%,
+    #090806 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 14px 60px rgba(0, 0, 0, 0.95),
+    0 0 100px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.vinyl.spinning {
+  animation: spin 1.82s linear infinite;
+}
+
+/* Groove rings via repeating radial gradient */
+.vinyl-grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at center,
+    transparent 0px,
+    transparent 3.5px,
+    rgba(255, 255, 255, 0.024) 3.5px,
+    rgba(255, 255, 255, 0.024) 4.5px
+  );
+}
+
+/* Reflective sheen that rotates with the vinyl */
+.vinyl-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(
+    130deg,
+    rgba(255, 255, 255, 0.055) 0%,
+    transparent 45%,
+    rgba(255, 255, 255, 0.018) 100%
+  );
+  pointer-events: none;
+}
+
+/* ─── Center Label ───────────────────────────────────────────────────── */
+
+.vinyl-label {
+  position: absolute;
+  width: 108px;
+  height: 108px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 40% 36%,
+    #5c3c10 0%,
+    #2c1806 45%,
+    #1a0d04 100%
+  );
+  border: 1px solid rgba(130, 75, 20, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Album artwork fills the label circle */
+.vinyl-artwork {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  animation: artFadeIn 0.55s ease;
+}
+
+.vinyl-label-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 32% 28%,
+    rgba(255, 200, 100, 0.18) 0%,
+    transparent 58%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.vinyl-label-text {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  color: rgba(190, 140, 60, 0.55);
+  position: relative;
+  z-index: 1;
+  user-select: none;
+}
+
+/* Spindle hole */
+.vinyl-spindle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0c0a07;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 2;
+}
+
+/* ─── Tonearm ────────────────────────────────────────────────────────── */
+
+.tonearm {
+  position: absolute;
+  top: 4px;
+  right: -14px;
+}
+
+.arm-pivot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 34%, #c0b098, #6a6050, #3a3228);
+  border: 1px solid rgba(160, 140, 100, 0.3);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.7);
+  position: relative;
+  z-index: 10;
+}
+
+.arm-body {
+  position: absolute;
+  top: 11px;
+  left: 11px;
+  transform-origin: 0 0;
+  transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.tonearm.resting .arm-body {
+  transform: rotate(14deg);
+}
+
+.tonearm.playing .arm-body {
+  transform: rotate(52deg);
+}
+
+.arm-shaft {
+  width: 3px;
+  height: 150px;
+  margin-left: -1.5px;
+  background: linear-gradient(
+    to right,
+    #6a6050 0%,
+    #c0b098 30%,
+    #a09080 60%,
+    #6a6050 100%
+  );
+  border-radius: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.arm-headshell {
+  position: absolute;
+  bottom: -2px;
+  left: -5px;
+  width: 14px;
+  height: 20px;
+  background: linear-gradient(to right, #888, #bbb 40%, #999);
+  border-radius: 3px 3px 5px 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.arm-needle {
+  position: absolute;
+  bottom: -10px;
+  left: -0.5px;
+  width: 2px;
+  height: 10px;
+  background: linear-gradient(to bottom, #aaa, #777);
+  border-radius: 0 0 1px 1px;
+}
+
+/* ─── Link Input ─────────────────────────────────────────────────────── */
+
+.link-row {
+  width: 100%;
+}
+
+.link-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(160, 110, 30, 0.22);
+  border-radius: 3px;
+  padding: 14px 18px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  color: #c0a870;
+  outline: none;
+  transition: border-color 0.25s, background 0.25s;
+  letter-spacing: 0.02em;
+}
+
+.link-input::placeholder {
+  color: rgba(140, 110, 60, 0.42);
+  font-style: italic;
+}
+
+.link-input:focus {
+  border-color: rgba(190, 130, 40, 0.45);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ─── Mood Section ───────────────────────────────────────────────────── */
+
+.mood-section {
+  width: 100%;
+}
+
+.section-label {
+  font-family: Georgia, serif;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(140, 110, 55, 0.5);
+  margin-bottom: 12px;
+}
+
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+/* 80s-style pushbutton */
+.mood-btn {
+  background: linear-gradient(180deg, #1d1810 0%, #12100a 100%);
+  border: 1px solid rgba(110, 80, 28, 0.38);
+  border-bottom: 3px solid rgba(70, 50, 14, 0.75);
+  border-radius: 3px;
+  padding: 11px 8px 9px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 12px;
+  color: rgba(150, 120, 64, 0.65);
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s, transform 0.08s, border-bottom 0.08s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.08em;
+  user-select: none;
+}
+
+.mood-btn:hover {
+  background: linear-gradient(180deg, #252016 0%, #181410 100%);
+  color: rgba(175, 142, 78, 0.85);
+}
+
+.mood-btn.active {
+  background: linear-gradient(180deg, #0e0c08 0%, #151208 100%);
+  border-bottom: 1px solid rgba(70, 50, 14, 0.75);
+  border-top: 2px solid rgba(60, 42, 10, 0.4);
+  transform: translateY(2px);
+  color: #c8a050;
+}
+
+/* LED indicator */
+.led {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(80, 52, 12, 0.6);
+  border: 1px solid rgba(70, 48, 14, 0.35);
+  transition: background 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+
+.mood-btn.active .led {
+  background: #d4902a;
+  border-color: #b87018;
+  box-shadow: 0 0 7px #d4902a, 0 0 14px rgba(212, 144, 42, 0.45);
+  animation: ledFlicker 6s ease-in-out infinite;
+}
+
+.mood-label {
+  line-height: 1;
+}
+
+/* ─── Controls ───────────────────────────────────────────────────────── */
+
+.controls-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.spin-btn {
+  flex: 1;
+  background: linear-gradient(180deg, #1d1810 0%, #12100a 100%);
+  border: 1px solid rgba(110, 80, 28, 0.38);
+  border-bottom: 3px solid rgba(70, 50, 14, 0.75);
+  border-radius: 3px;
+  padding: 15px 20px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  color: #b89860;
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s, transform 0.08s, border-bottom 0.08s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  letter-spacing: 0.07em;
+  user-select: none;
+}
+
+.spin-btn:hover {
+  background: linear-gradient(180deg, #252016 0%, #181410 100%);
+  color: #d0b070;
+}
+
+.spin-btn.playing {
+  background: linear-gradient(180deg, #0e0c08 0%, #151208 100%);
+  border-bottom: 1px solid rgba(70, 50, 14, 0.75);
+  border-top: 2px solid rgba(60, 42, 10, 0.4);
+  transform: translateY(2px);
+  color: #d4a840;
+}
+
+.spin-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.share-btn {
+  background: transparent;
+  border: 1px solid rgba(110, 80, 28, 0.28);
+  border-radius: 3px;
+  padding: 15px 22px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 13px;
+  color: rgba(140, 110, 58, 0.65);
+  cursor: pointer;
+  transition: color 0.18s, border-color 0.18s, background 0.18s;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.share-btn:hover {
+  border-color: rgba(160, 120, 40, 0.48);
+  color: rgba(180, 145, 76, 0.9);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+/* ─── Player Zone ────────────────────────────────────────────────────── */
+
+.player-zone {
+  width: 100%;
+  border: 1px dashed rgba(110, 80, 28, 0.22);
+  border-radius: 3px;
+  padding: 30px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.018);
+  box-sizing: border-box;
+  transition: border-color 0.4s, padding 0.4s, background 0.4s;
+}
+
+.player-zone.has-embed {
+  padding: 0;
+  border: 1px solid rgba(110, 80, 28, 0.18);
+  background: transparent;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+/* YouTube player uses a 16:9 aspect-ratio wrapper so it scales correctly */
+.player-zone.has-embed.youtube {
+  border-radius: 8px;
+  display: block;
+}
+
+.yt-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.yt-embed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  animation: embedFadeIn 0.45s ease;
+}
+
+.player-zone-label {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 12px;
+  font-style: italic;
+  color: rgba(110, 88, 46, 0.46);
+  letter-spacing: 0.1em;
+}
+
+.player-zone-hint {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 12px;
+  font-style: italic;
+  color: rgba(160, 110, 50, 0.55);
+  letter-spacing: 0.08em;
+}
+
+@keyframes artFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes embedFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.spotify-embed {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  animation: embedFadeIn 0.45s ease;
+}
+
+/* ─── Short Link ─────────────────────────────────────────────────────── */
+
+.shortlink-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.shortlink-tag {
+  font-family: Georgia, serif;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(110, 88, 40, 0.45);
+}
+
+.shortlink-url {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  color: rgba(170, 132, 62, 0.62);
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(160, 120, 48, 0.18);
+  padding-bottom: 1px;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────── */
+
+.footer {
+  width: 100%;
+  padding: 22px 32px;
+  text-align: center;
+  font-family: Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(100, 80, 42, 0.38);
+  border-top: 1px solid rgba(160, 100, 20, 0.1);
+  box-sizing: border-box;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .stage {
+    width: 300px;
+    height: 300px;
+  }
+
+  .vinyl {
+    top: 14px;
+    left: 14px;
+    width: 272px;
+    height: 272px;
+  }
+
+  .vinyl-glow {
+    width: 340px;
+    height: 340px;
+  }
+
+  .arm-shaft {
+    height: 120px;
+  }
+
+  .mood-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .controls-row {
+    flex-direction: column;
+  }
+
+  .share-btn {
+    text-align: center;
+  }
+}
