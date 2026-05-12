@@ -85,11 +85,12 @@ function VinylRecord({ isSpinning, artworkUrl }) {
         <div className="platter-ring" />
         <div className={`vinyl${isSpinning ? ' spinning' : ''}`}>
           {artworkUrl && (
-            <img
+            <div
               key={artworkUrl}
-              src={artworkUrl}
-              alt="Album artwork"
               className="vinyl-artwork"
+              style={{ backgroundImage: `url(${artworkUrl})` }}
+              role="img"
+              aria-label="Album artwork"
             />
           )}
           <div className="vinyl-grooves" />
