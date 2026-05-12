@@ -60,17 +60,40 @@ function parseUrl(raw) {
 
 async function fetchArtwork(source) {
   if (source.platform === 'youtube') {
-    // Thumbnail URL is deterministic — no network call needed
-    return `https://img.youtube.com/vi/${source.videoId}/hqdefault.jpg`
+    console.log('[KansoRoom] source: youtube, videoId:', source.videoId)
+    const { videoId } = source
+    const candidates = [
+      `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+      `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+      `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+    ]
+    for (const url of candidates) {
+      // YouTube returns a 120×90 placeholder when a resolution doesn't exist
+      const resolved = await new Promise(resolve => {
+        const img = new Image()
+        img.onload = () => resolve(img.naturalWidth > 120 ? url : null)
+        img.onerror = () => resolve(null)
+        img.src = url
+      })
+      if (resolved) {
+        console.log('[KansoRoom] artworkUrl:', resolved)
+        return resolved
+      }
+    }
+    // Last-resort fallback — hqdefault always exists even if it has black bars
+    console.log('[KansoRoom] artworkUrl: fallback hqdefault')
+    return candidates[1]
   }
   // Spotify: use the public oEmbed endpoint (no API key required)
   try {
+    console.log('[KansoRoom] source: spotify, id:', source.id)
     const spotifyUrl = `https://open.spotify.com/${source.type}/${source.id}`
     const res = await fetch(
       `https://open.spotify.com/oembed?url=${encodeURIComponent(spotifyUrl)}`
     )
     if (!res.ok) return null
     const { thumbnail_url } = await res.json()
+    console.log('[KansoRoom] artworkUrl:', thumbnail_url)
     return thumbnail_url ?? null
   } catch {
     return null
