@@ -84,16 +84,16 @@ function VinylRecord({ isSpinning, artworkUrl }) {
         <div className={`vinyl-glow${isSpinning ? ' active' : ''}`} />
         <div className="platter-ring" />
         <div className={`vinyl${isSpinning ? ' spinning' : ''}`}>
+          {artworkUrl && (
+            <img
+              key={artworkUrl}
+              src={artworkUrl}
+              alt="Album artwork"
+              className="vinyl-artwork"
+            />
+          )}
           <div className="vinyl-grooves" />
           <div className="vinyl-label">
-            {artworkUrl && (
-              <img
-                key={artworkUrl}
-                src={artworkUrl}
-                alt="Album artwork"
-                className="vinyl-artwork"
-              />
-            )}
             <div className="vinyl-label-shine" />
             {!artworkUrl && <span className="vinyl-label-text">KR</span>}
             <div className="vinyl-spindle" />
