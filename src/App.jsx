@@ -4,6 +4,30 @@ import './App.css'
 // MP3s and their manifest live in public/, so Netlify serves them as static files
 const MUSIC_DIR = `${import.meta.env.BASE_URL}music/shpacones/`
 
+const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp']
+
+// The listed cover first, then the same name with other image extensions,
+// so "cover.jpg" in the manifest still finds cover.png (and vice versa)
+function artworkCandidates(cover) {
+  const match = cover.match(/^(.*)\.([a-z0-9]+)$/i)
+  const base = match ? match[1] : cover
+  const ext = match?.[2].toLowerCase()
+  const names = [
+    ...(match ? [cover] : []),
+    ...IMAGE_EXTENSIONS.filter(e => e !== ext).map(e => `${base}.${e}`),
+  ]
+  return names.map(name => MUSIC_DIR + encodeURIComponent(name))
+}
+
+function imageLoads(url) {
+  return new Promise(resolve => {
+    const img = new Image()
+    img.onload = () => resolve(true)
+    img.onerror = () => resolve(false)
+    img.src = url
+  })
+}
+
 async function loadManifest() {
   try {
     const res = await fetch(`${MUSIC_DIR}tracks.json`, { cache: 'no-cache' })
@@ -21,7 +45,7 @@ async function loadManifest() {
           title: t.title || t.file.replace(/\.mp3$/i, ''),
           artist: t.artist ?? artist ?? '',
           src: MUSIC_DIR + encodeURIComponent(t.file),
-          artwork: cover ? MUSIC_DIR + encodeURIComponent(cover) : null,
+          artwork: cover ? artworkCandidates(cover) : [],
         }
       })
   } catch {
@@ -88,8 +112,13 @@ function parseUrl(raw) {
 }
 
 async function fetchArtwork(source) {
-  // Local tracks use the cover listed in the manifest (preloaded before display)
-  if (source.platform === 'mp3') return source.artwork
+  // Local tracks use the first cover candidate that actually exists
+  if (source.platform === 'mp3') {
+    for (const url of source.artwork) {
+      if (await imageLoads(url)) return url
+    }
+    return null
+  }
 
   if (source.platform === 'youtube') {
     console.log('[KansoRoom] source: youtube, videoId:', source.videoId)

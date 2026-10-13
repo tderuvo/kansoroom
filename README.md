@@ -32,7 +32,7 @@ Edit `public/music/shpacones/tracks.json`:
 - `file` must match the MP3's filename exactly, including upper and lower case.
 - `title` is the name shown in the menu. If it's left out, the menu shows the filename instead.
 - Tracks appear in the menu in the order they're listed.
-- `artwork` is optional. Put the image in the same folder and the record will show it. A track can have its own `"artwork"` that overrides the album cover.
+- `artwork` is optional. Put the image in the same folder and the record will show it. JPG, JPEG, PNG and WebP all work. If the listed file is missing, KansoRoom tries the same name with the other extensions, so `"cover.jpg"` still finds `cover.png`. A track can have its own `"artwork"` that overrides the album cover.
 - JSON is strict. Separate entries with commas and don't put a comma after the last one. If the file is invalid, the menu shows "No Shpacones tracks yet."
 
 You don't need to change any code. Reload the page to see the new tracks.
