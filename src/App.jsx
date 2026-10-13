@@ -1,5 +1,34 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
+
+// MP3s and their manifest live in public/, so Netlify serves them as static files
+const MUSIC_DIR = `${import.meta.env.BASE_URL}music/shpacones/`
+
+async function loadManifest() {
+  try {
+    const res = await fetch(`${MUSIC_DIR}tracks.json`, { cache: 'no-cache' })
+    if (!res.ok) return []
+    const { artist, artwork, tracks } = await res.json()
+    if (!Array.isArray(tracks)) return []
+
+    return tracks
+      .filter(t => t && typeof t.file === 'string' && t.file.trim())
+      .map(t => {
+        const cover = t.artwork ?? artwork
+        return {
+          platform: 'mp3',
+          file: t.file,
+          title: t.title || t.file.replace(/\.mp3$/i, ''),
+          artist: t.artist ?? artist ?? '',
+          src: MUSIC_DIR + encodeURIComponent(t.file),
+          artwork: cover ? MUSIC_DIR + encodeURIComponent(cover) : null,
+        }
+      })
+  } catch {
+    // Missing or malformed manifest — the track picker simply shows no tracks
+    return []
+  }
+}
 
 const SPOTIFY_TYPES = ['track', 'album', 'playlist', 'artist', 'episode', 'show']
 
@@ -59,6 +88,9 @@ function parseUrl(raw) {
 }
 
 async function fetchArtwork(source) {
+  // Local tracks use the cover listed in the manifest (preloaded before display)
+  if (source.platform === 'mp3') return source.artwork
+
   if (source.platform === 'youtube') {
     console.log('[KansoRoom] source: youtube, videoId:', source.videoId)
     const { videoId } = source
@@ -100,6 +132,17 @@ async function fetchArtwork(source) {
   }
 }
 
+// Identity of a source: Spotify (type+id), YouTube (videoId) or MP3 (src)
+function sourceKey(source) {
+  if (!source) return ''
+  return [source.platform, source.type, source.id, source.videoId, source.src].join('|')
+}
+
+function audioErrorMessage(track, err) {
+  if (err?.name === 'NotAllowedError') return 'The browser blocked playback. Tap Play again.'
+  return `Couldn't play “${track.title}”. Check that ${track.file} is in public/music/shpacones/.`
+}
+
 function VinylRecord({ isSpinning, artworkUrl }) {
   return (
     <div className="plinth">
@@ -134,6 +177,15 @@ export default function App() {
   const [embed, setEmbed] = useState(null)
   const [artworkUrl, setArtworkUrl] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [tracks, setTracks] = useState([])
+  const [audioError, setAudioError] = useState(null)
+  const audioRef = useRef(null)
+
+  const isMp3 = embed?.platform === 'mp3'
+
+  useEffect(() => {
+    loadManifest().then(setTracks)
+  }, [])
 
   useEffect(() => {
     if (!embed) { setArtworkUrl(null); return }
@@ -149,12 +201,44 @@ export default function App() {
     })
 
     return () => { cancelled = true }
-  // cover both Spotify (type+id) and YouTube (videoId) identity fields
-  }, [embed?.platform, embed?.id, embed?.videoId])
+  // cover Spotify (type+id), YouTube (videoId) and MP3 (src) identity fields
+  }, [embed?.platform, embed?.id, embed?.videoId, embed?.src])
 
-  useEffect(() => {
+  function changeSource(next) {
+    setEmbed(next)
+    // Typing in the link box re-parses the same source on every keystroke
+    if (sourceKey(next) === sourceKey(embed)) return
     setSpinning(false)
-  }, [embed?.platform, embed?.id, embed?.videoId])
+    setAudioError(null)
+    // Switching away from (or between) MP3s must silence the previous track
+    audioRef.current?.pause()
+  }
+
+  function handleTrackSelect(file) {
+    setLink('')
+    changeSource(tracks.find(t => t.file === file) ?? null)
+  }
+
+  function handlePlayStop() {
+    if (!isMp3) { setSpinning(s => !s); return }
+
+    const audio = audioRef.current
+    if (!audio.paused) {
+      audio.pause()
+      audio.currentTime = 0
+      return
+    }
+    setAudioError(null)
+    audio.play().catch(err => {
+      // AbortError just means a newer load/pause interrupted this play() call
+      if (err.name !== 'AbortError') setAudioError(audioErrorMessage(embed, err))
+    })
+  }
+
+  function handleAudioError() {
+    setSpinning(false)
+    setAudioError(audioErrorMessage(embed))
+  }
 
   function handleShare() {
     navigator.clipboard?.writeText('https://1dgj.com/kanso82')
@@ -185,15 +269,32 @@ export default function App() {
             value={link}
             onChange={e => {
               setLink(e.target.value)
-              setEmbed(parseUrl(e.target.value))
+              changeSource(parseUrl(e.target.value))
             }}
           />
+        </div>
+
+        <div className="track-row">
+          <select
+            className="track-select"
+            aria-label="Choose a Shpacones track"
+            value={isMp3 ? embed.file : ''}
+            onChange={e => handleTrackSelect(e.target.value)}
+            disabled={tracks.length === 0}
+          >
+            <option value="">
+              {tracks.length ? 'Or choose a Shpacones track…' : 'No Shpacones tracks yet'}
+            </option>
+            {tracks.map(t => (
+              <option key={t.file} value={t.file}>{t.title}</option>
+            ))}
+          </select>
         </div>
 
         <div className="controls-row">
           <button
             className={`spin-btn${spinning ? ' playing' : ''}`}
-            onClick={() => setSpinning(s => !s)}
+            onClick={handlePlayStop}
             disabled={!embed}
           >
             <span className="spin-icon">{spinning ? '■' : '▶'}</span>
@@ -204,12 +305,28 @@ export default function App() {
           </button>
         </div>
 
+        <audio
+          ref={audioRef}
+          src={isMp3 ? embed.src : undefined}
+          preload="metadata"
+          onPlaying={() => setSpinning(true)}
+          onPause={() => setSpinning(false)}
+          onEnded={() => setSpinning(false)}
+          onError={() => { if (isMp3) handleAudioError() }}
+        />
+
         <div className={[
           'player-zone',
-          embed ? 'has-embed' : '',
+          embed && !isMp3 ? 'has-embed' : '',
           embed?.platform === 'youtube' ? 'youtube' : '',
         ].filter(Boolean).join(' ')}>
-          {embed?.platform === 'youtube' ? (
+          {isMp3 ? (
+            <div className="track-now">
+              <span className="shortlink-tag">{embed.artist || 'Now playing'}</span>
+              <span className="track-title">{embed.title}</span>
+              {audioError && <span className="track-error" role="alert">{audioError}</span>}
+            </div>
+          ) : embed?.platform === 'youtube' ? (
             <div className="yt-wrapper">
               <iframe
                 key={embed.videoId}

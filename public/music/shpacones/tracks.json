@@ -1,0 +1,11 @@
+{
+  "artist": "The Shpacones",
+  "artwork": "cover.jpg",
+  "tracks": [
+    {
+      "file": "06-jamming-through-the-years.mp3",
+      "title": "Jamming Through the Years",
+      "duration": 180
+    }
+  ]
+}
